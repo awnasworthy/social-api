@@ -10,26 +10,39 @@ const userController = {
     //get all users
     getAllUsers(req, res) {
       Users.find({})
-      // populate users thoughts
-      .populate({path: 'thoughts', select: '-__v'})
-      // populate user friends
-      .populate({path: 'friends', select: '-__v'})
-      .select('-__v')
-      // .sort({_id: -1})
       .then(dbUsersData => res.json(dbUsersData))
       .catch(err => {
           console.log(err);
           res.status(500).json(err);
       });
   },
-
     //get single user
-
-    //post new user
-
+    getUsersById({ params }, res) {
+      Users.findOne({ _id: params.id })
+      .then(dbUsersData => res.json(dbUsersData))
+      .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+      })
+    },
     //update user by id
-
+    updateUsers({ params, body }, res) {
+      Users.findOneAndUpdate({ _id: params.id }, body, {new: true, runValidators: true })
+      .then(dbUsersData => {
+        if (!dbUsersData) {
+          res.status(404).json({ message: 'No user found with this id'});
+          return;
+        }
+        res.json(dbUsersData);
+      })
+      .catch(err => res.json(err));
+    },
     //delete by id
+    deleteUsers({ params }, res) {
+      Users.findOneAndDelete({ _id: params.id })
+        .then(dbUsersData => res.json(dbUsersData))
+        .catch(err => res.json(err));
+    }
 };
 
 module.exports = userController;
